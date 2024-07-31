@@ -1,4 +1,4 @@
-import 'package:converter/home.dart';
+import 'package:converter/ui/home.dart';
 import 'package:flutter/material.dart';
 
 class App extends StatelessWidget {
@@ -8,7 +8,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "Azizbek Oxunov",
+      title: "Currency converter",
       home: HomePage(),
     );
   }
