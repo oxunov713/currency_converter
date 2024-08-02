@@ -12,9 +12,10 @@ class MainController {
 
   List<Convert>? models;
 
-  Future<void> getData() async {
+  Future<List<Convert>> getData() async {
     try {
       models = await repository.getData();
+      return models ?? [];
     } on UnknownException catch (error, stackTrace) {
       print(error);
       print(stackTrace);
@@ -28,5 +29,6 @@ class MainController {
       print(error);
       print(stackTrace);
     }
+    return [];
   }
 }
