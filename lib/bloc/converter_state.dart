@@ -12,22 +12,20 @@ class CurrencyLoading extends CurrencyState {}
 
 class CurrencyLoaded extends CurrencyState {
   final List<Convert> models;
-  final String selectedCountry1;
-  final String selectedCountry2;
-  final String rate1;
-  final String rate2;
+  final double convertedCurrency;
+  final Convert selectedCountry1;
+  final Convert selectedCountry2;
 
   CurrencyLoaded({
+    required this.convertedCurrency,
     required this.models,
     required this.selectedCountry1,
     required this.selectedCountry2,
-    required this.rate1,
-    required this.rate2,
   });
 
   @override
   List<Object> get props =>
-      [models, selectedCountry1, selectedCountry2, rate1, rate2];
+      [models, selectedCountry1, selectedCountry2, convertedCurrency];
 }
 
 class CurrencyError extends CurrencyState {

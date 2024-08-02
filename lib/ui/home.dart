@@ -1,256 +1,286 @@
-import 'package:converter/controller/controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/converter_cubit.dart';
 import '../bloc/converter_state.dart';
-import '../data/repository.dart';
 import 'package:country_flags/country_flags.dart';
-
-import '../model/model.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => CurrencyCubit(
-          controller: MainController(repository: CurrencyRepository())),
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        backgroundColor: const Color(0xFFEAEAFE),
-        body: BlocBuilder<CurrencyCubit, CurrencyState>(
-          builder: (context, state) {
-            print('Current state: $state');
-            if (state is CurrencyLoading) {
-              return Center(child: CircularProgressIndicator());
-            } else if (state is CurrencyLoaded) {
-              final cubit = context.read<CurrencyCubit>();
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      backgroundColor: const Color(0xFFEAEAFE),
+      body: BlocBuilder<CurrencyCubit, CurrencyState>(
+        builder: (context, state) {
+          print('Current state: $state');
+          if (state is CurrencyLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is CurrencyLoaded) {
+            final orientation = MediaQuery.of(context).orientation;
+            bool isPortrait = (orientation == Orientation.portrait);
 
-              // Unique country codes to prevent duplicate dropdown values
-              final uniqueCountryCodes = {
-                for (var item in state.models) item.ccy!,
-              }.toList();
+            String oneCurrency =
+                "${state.selectedCountry1.nominal} ${state.selectedCountry1.ccy} = ${"${double.tryParse(state.selectedCountry1.rate!)! / double.tryParse(state.selectedCountry2.rate!)!}".substring(0, 6)} ${state.selectedCountry2.ccy} ";
 
-              return SafeArea(
+            return SingleChildScrollView(
+              child: SafeArea(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.only(top: 50, bottom: 10),
-                      child: Center(
-                        child: Text(
-                          "Currency Converter",
-                          style: TextStyle(
-                            fontSize: 35,
-                            color: Color(0xFF1F2261),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                    //? Custom appbar
+                    const Text(
+                      "Currency Converter",
+                      style: TextStyle(
+                        fontSize: 35,
+                        color: Color(0xFF1F2261),
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const Center(
+                    const Text(
+                      "Central Bank of Uzbekistan",
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Color(0xFF808080),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 5, horizontal: 10),
                       child: Text(
-                        "Central Bank of Uzbekistan",
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: Color(0xFF808080),
+                        "${state.models[0].date}",
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
                         ),
-                        textAlign: TextAlign.center,
                       ),
                     ),
-                    Container(
+                    //? Card
+                    Card(
                       margin:
-                      const EdgeInsets.only(left: 15, right: 15, top: 30),
-                      height: 350,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFFFFFFF),
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(20),
+                          const EdgeInsets.only(left: 15, right: 15, top: 30),
+                      child: DecoratedBox(
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFFFFFFF),
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(20),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 15,
+                            horizontal: 12,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              //? Amount
+                              const Text(
+                                "Amount",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Color(0xFF989898),
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+                              //? Country1
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  CountryFlag.fromCountryCode(
+                                    state.selectedCountry1.ccy!.substring(0, 2),
+                                    height: 50,
+                                    width: isPortrait ? 50 : 120,
+                                    shape: isPortrait
+                                        ? const Circle()
+                                        : const RoundedRectangle(5),
+                                  ),
+                                  DropdownMenu<String>(
+                                    initialSelection:
+                                        state.selectedCountry1.ccy,
+                                    dropdownMenuEntries: [
+                                      for (var item in state.models)
+                                        DropdownMenuEntry<String>(
+                                          value: item.ccy!,
+                                          label: item.ccyNm_UZ!,
+                                        ),
+                                    ],
+                                    onSelected: (String? value) => context
+                                        .read<CurrencyCubit>()
+                                        .changeCountry1(value),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 15),
+                              Center(
+                                child: IconButton(
+                                    color: const Color(0xFF1F2261),
+                                    onPressed: () => context
+                                        .read<CurrencyCubit>()
+                                        .exchangeCountry(),
+                                    icon: const Icon(Icons.swap_vert)),
+                              ),
+                              //? Converted amount
+                              const Text(
+                                "Converted amount",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Color(0xFF989898),
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  CountryFlag.fromCountryCode(
+                                    state.selectedCountry2.ccy!.substring(0, 2),
+                                    height: 50,
+                                    width: isPortrait ? 50 : 120,
+                                    shape: isPortrait
+                                        ? const Circle()
+                                        : const RoundedRectangle(5),
+                                  ),
+                                  DropdownMenu<String>(
+                                    initialSelection:
+                                        state.selectedCountry2.ccy,
+                                    dropdownMenuEntries: [
+                                      for (var item in state.models)
+                                        DropdownMenuEntry<String>(
+                                          value: item.ccy!,
+                                          label: item.ccyNm_UZ!,
+                                        ),
+                                    ],
+                                    onSelected: (String? value) => context
+                                        .read<CurrencyCubit>()
+                                        .changeCountry2(value),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 30),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    flex: 3,
+                                    child: TextField(
+                                      style: const TextStyle(fontSize: 20),
+                                      textAlign: TextAlign.center,
+                                      keyboardType: TextInputType.number,
+                                      onChanged: (value) {
+                                        context
+                                            .read<CurrencyCubit>()
+                                            .exchangeCurrency(value);
+                                      },
+                                      decoration: const InputDecoration(
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(20)),
+                                          borderSide:
+                                              BorderSide(color: Colors.green),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(20),
+                                          ),
+                                          borderSide:
+                                              BorderSide(color: Colors.black),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 3),
+                                  const Expanded(
+                                    flex: 1,
+                                    child: Center(
+                                      child: Text(
+                                        "=",
+                                        style: TextStyle(fontSize: 40),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Container(
+                                      height: 60,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: Colors.black, width: 1),
+                                        borderRadius: const BorderRadius.all(
+                                          Radius.circular(20),
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 5),
+                                          child: Text(
+                                            "${state.convertedCurrency}",
+                                            textAlign: TextAlign.center,
+                                            maxLines: 1,
+                                            style: const TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 24,
+                                                overflow: TextOverflow.clip),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 20),
+                              //? Date
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 5, horizontal: 10),
+                                child: Text(
+                                  oneCurrency,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.all(12),
+                    ),
+                    isPortrait
+                        ? const Padding(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 18),
                             child: Text(
-                              "Amount",
+                              "* Agar sizning kiritayotgan summangiz katta bo'lsa, ekranni aylantiring!",
                               style: TextStyle(
-                                fontSize: 15,
-                                color: Color(0xFF989898),
-                              ),
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              CountryFlag.fromCountryCode(
-                                state.selectedCountry1.substring(0, 2),
-                                height: 50,
-                                width: 50,
-                                shape: const Circle(),
-                              ),
-                              DropdownButton<String>(
-                                value: state.selectedCountry1,
-                                items: uniqueCountryCodes.map((countryCode) {
-                                  return DropdownMenuItem<String>(
-                                    value: countryCode,
-                                    child: Text(
-                                      state.models.firstWhere(
-                                              (item) => item.ccy == countryCode,
-                                          orElse: () => Convert(ccy: countryCode, ccyNm_UZ: countryCode)
-                                      ).ccyNm_UZ!,
-                                    ),
-                                  );
-                                }).toList(),
-                                onChanged: (value) =>
-                                    cubit.changeCountry1(value!),
-                              ),
-                            ],
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.all(12),
-                            child: Text(
-                              "Converted amount",
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: Color(0xFF989898),
-                              ),
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              CountryFlag.fromCountryCode(
-                                state.selectedCountry2.substring(0, 2),
-                                height: 50,
-                                width: 50,
-                                shape: const Circle(),
-                              ),
-                              DropdownButton<String>(
-                                value: state.selectedCountry2,
-                                items: uniqueCountryCodes.map((countryCode) {
-                                  return DropdownMenuItem<String>(
-                                    value: countryCode,
-                                    child: Text(
-                                      state.models.firstWhere(
-                                              (item) => item.ccy == countryCode,
-                                          orElse: () => Convert(ccy: countryCode, ccyNm_UZ: countryCode)
-                                      ).ccyNm_UZ!,
-                                    ),
-                                  );
-                                }).toList(),
-                                onChanged: (value) =>
-                                    cubit.changeCountry2(value!),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Container(
-                                height: 50,
-                                width: 140,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFEFEFEF),
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(20),
-                                  ),
-                                ),
-                                child: TextField(
-                                  textAlign: TextAlign.center,
-                                  keyboardType: TextInputType.number,
-                                  onChanged: (value) {
-                                    final amount = double.tryParse(value) ?? 0;
-                                    final rate1 = double.tryParse(state.rate1) ?? 0;
-                                    final rate2 = double.tryParse(state.rate2) ?? 0;
-                                    final convertedAmount = amount * (rate2 / rate1);
-                                    // Update the UI with the calculated result
-                                    cubit.emit(CurrencyLoaded(
-                                      models: state.models,
-                                      selectedCountry1: state.selectedCountry1,
-                                      selectedCountry2: state.selectedCountry2,
-                                      rate1: state.rate1,
-                                      rate2: state.rate2,
-
-                                    ));
-                                  },
-                                  decoration: const InputDecoration(
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(20),
-                                      ),
-                                      borderSide:
-                                      BorderSide(color: Colors.black26),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(20),
-                                      ),
-                                      borderSide:
-                                      BorderSide(color: Colors.black),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const Text(
-                                "=",
-                                style: TextStyle(fontSize: 40),
-                              ),
-                              Container(
-                                height: 50,
-                                width: 140,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFEFEFEF),
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(20),
-                                  ),
-                                ),
-                                child: TextField(
-                                  textAlign: TextAlign.center,
-                                  keyboardType: TextInputType.number,
-                                  readOnly: true,
-                                  decoration: InputDecoration(
-                                    contentPadding: EdgeInsets.symmetric(vertical: 10),
-                                    border: InputBorder.none,
-                                    hintText: '0.00',
-                                    hintStyle: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: Text("",
-                             // "Converted amount: ${state.convertedAmount ?? '0.00'} ${state.selectedCountry2}",
-                              style: const TextStyle(
-                                fontSize: 20,
-                                color: Colors.black,
+                                fontSize: 13,
+                                color: Colors.grey,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
+                          )
+                        : const SizedBox(
+                            height: 60,
                           ),
-                        ],
-                      ),
-                    ),
                   ],
                 ),
-              );
-            } else if (state is CurrencyError) {
-              return Center(child: Text(state.message));
-            } else {
-              return Center(child: Text('Unknown state'));
-            }
-          },
-        ),
+              ),
+            );
+          } else if (state is CurrencyError) {
+            return Center(child: Text(state.message));
+          } else {
+            return const Center(child: Text('Unknown state'));
+          }
+        },
       ),
     );
   }
 }
-
