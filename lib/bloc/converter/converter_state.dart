@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../model/model.dart';
+import '../../model/model.dart';
 
 abstract class CurrencyState extends Equatable {
   @override

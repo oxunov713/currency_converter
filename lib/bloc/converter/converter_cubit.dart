@@ -1,7 +1,9 @@
+import 'dart:math';
+
 import 'package:bloc/bloc.dart';
 import 'package:converter/controller/controller.dart';
 
-import '../model/model.dart';
+import '../../model/model.dart';
 import 'converter_state.dart';
 
 class CurrencyCubit extends Cubit<CurrencyState> {
@@ -10,21 +12,18 @@ class CurrencyCubit extends Cubit<CurrencyState> {
   double convertedCurrency = 0;
   late Convert selectedCountry1;
   late Convert selectedCountry2;
-  String input = "1";
+  String input = "0";
 
   CurrencyCubit({required this.controller}) : super(CurrencyInitial()) {
-    _fetchData();
+    fetchData();
   }
 
-  Future<void> _fetchData() async {
+  Future<void> fetchData() async {
     emit(CurrencyLoading());
 
     try {
       final data = await controller.getData();
       models = data;
-
-      selectedCountry1 = models.first;
-      selectedCountry2 = models.last;
       models.add(
         Convert(
           ccy: "UZS",
@@ -40,6 +39,11 @@ class CurrencyCubit extends Cubit<CurrencyState> {
           rate: "1",
         ),
       );
+      int n1 = Random().nextInt(models.length);
+      int n2 = Random().nextInt(models.length);
+      selectedCountry1 = models[n1];
+      selectedCountry2 = models[n2];
+
       emit(
         CurrencyLoaded(
           models: models,
@@ -81,8 +85,6 @@ class CurrencyCubit extends Cubit<CurrencyState> {
     selectedCountry1 = selectedCountry2;
     selectedCountry2 = temp;
 
-    print(selectedCountry1.ccyNm_UZ);
-    print(selectedCountry2.ccyNm_UZ);
     exchangeCurrency(input);
     emit(CurrencyLoaded(
       models: models,
@@ -94,14 +96,16 @@ class CurrencyCubit extends Cubit<CurrencyState> {
 
   void exchangeCurrency(String value) {
     input = value;
-    
+
     double fromRate = double.tryParse(selectedCountry1.rate ?? "0") ?? 0;
     double toRate = double.tryParse(selectedCountry2.rate ?? "0") ?? 0;
 
-    double amountInBase = double.tryParse(input) ?? 0 * fromRate;
+
+    double amountInBase = (double.tryParse(input) ?? 0) * fromRate;
     if (toRate != 0) {
       convertedCurrency = amountInBase / toRate;
     }
+
 
     emit(CurrencyLoaded(
       models: models,

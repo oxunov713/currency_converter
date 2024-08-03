@@ -1,4 +1,5 @@
-import 'package:converter/bloc/converter_cubit.dart';
+import 'package:converter/bloc/connection/connection_cubit.dart';
+import 'package:converter/bloc/converter/converter_cubit.dart';
 import 'package:converter/controller/controller.dart';
 import 'package:converter/data/repository.dart';
 import 'package:converter/ui/home.dart';
@@ -12,10 +13,16 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => CurrencyCubit(controller: controller),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => ConnectionCubit(),
+        ),
+        BlocProvider(
+          create: (_) => CurrencyCubit(controller: controller),
+        ),
+      ],
       child: const MaterialApp(
-
         debugShowCheckedModeBanner: false,
         title: "Currency converter",
         home: HomePage(),
