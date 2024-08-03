@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import '../localization/app_localizations.dart';
+
 class Convert {
   int? id;
   String? code;
@@ -38,4 +41,19 @@ class Convert {
         diff: json["Diff"] as String?,
         date: json["Date"] as String?,
       );
+
+  String getLocalizedName(BuildContext context) {
+    final locale = AppLocalizations.of(context)!;
+    switch (locale.localeName) {
+      case 'ru':
+        return ccyNm_RU ?? ccy ?? 'Unknown';
+      case 'uz':
+        return ccyNm_UZ ?? ccy ?? 'Unknown';
+      case 'uz_CY':
+        return ccyNm_UZC ?? ccy ?? 'Unknown';
+      case 'en':
+      default:
+        return ccyNm_EN ?? ccy ?? 'Unknown';
+    }
+  }
 }

@@ -1,0 +1,15 @@
+{
+  "appName": "Currency Converter",
+  "bank": "Central Bank of Uzbekistan",
+  "amount": "Amount",
+  "conAmount": "Converted amount",
+  "ps": "* If the amount you are entering is large, rotate the screen!",
+  "intUnavailable": "Internet unavailable",
+  "check": "Please check your internet connection.",
+  "invRate": "Invalid rate data",
+  "incompleteCurr": "Incomplete currency data",
+  "contacts": "Contacts",
+  "moreApps": "More apps",
+  "language": "Language",
+  "choseLan": "Which language do you choose?"
+}

@@ -1,0 +1,15 @@
+{
+  "appName": "Valyuta Converter",
+  "bank": "O‘zbekiston Markaziy Banki",
+  "amount": "Miqdor",
+  "conAmount": "O‘zgartirilgan miqdor",
+  "ps": "* Agar kiritayotgan miqdoringiz katta bo‘lsa, ekraningni aylantiring!",
+  "intUnavailable": "Internet mavjud emas",
+  "check": "Iltimos, internet ulanishingizni tekshiring.",
+  "invRate": "Noto‘g‘ri kurs ma'lumotlari",
+  "incompleteCurr": "Noto‘liq valyuta ma'lumotlari",
+  "contacts": "Kontaktlar",
+  "moreApps": "Boshqa dasturlar",
+  "language": "Til",
+  "choseLan": "Qaysi tilni tanlaysiz"
+}
